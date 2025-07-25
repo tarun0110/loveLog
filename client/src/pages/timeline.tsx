@@ -20,6 +20,7 @@ export default function Timeline() {
   
   const [selectedMemory, setSelectedMemory] = useState<MemoryWithDetails | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<{
     location?: string;
@@ -38,6 +39,18 @@ export default function Timeline() {
 
   const { data: memories = [], isLoading: memoriesLoading, error } = useQuery<MemoryWithDetails[]>({
     queryKey: ["/api/memories", queryParams.toString()],
+    queryFn: async () => {
+      const url = queryParams.toString() 
+        ? `/api/memories?${queryParams.toString()}`
+        : '/api/memories';
+      const response = await fetch(url, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
     retry: false,
   });
 
@@ -171,7 +184,12 @@ export default function Timeline() {
                   Profile
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-chocolate hover:text-rose-primary"
+                onClick={() => setShowSearch(!showSearch)}
+              >
                 <Search className="text-lg" />
               </Button>
               <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
@@ -228,12 +246,14 @@ export default function Timeline() {
         </div>
 
         {/* Search and Filters */}
-        <SearchFilters 
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          filters={filters}
-          onFiltersChange={setFilters}
-        />
+        {showSearch && (
+          <SearchFilters 
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
+        )}
 
         {/* Timeline Container */}
         <div className="space-y-12">

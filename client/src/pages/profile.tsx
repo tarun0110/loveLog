@@ -56,7 +56,7 @@ export default function Profile() {
   // Accept invitation mutation
   const acceptMutation = useMutation({
     mutationFn: async (invitationId: string) => {
-      await apiRequest(`/api/partnerships/${invitationId}/accept`, "PATCH");
+      await apiRequest("PATCH", `/api/partnerships/${invitationId}/accept`);
     },
     onSuccess: () => {
       toast({
@@ -67,6 +67,7 @@ export default function Profile() {
       queryClient.invalidateQueries({ queryKey: ["/api/partnerships/active"] });
     },
     onError: (error) => {
+      console.log(error);
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -89,7 +90,7 @@ export default function Profile() {
   // Reject invitation mutation
   const rejectMutation = useMutation({
     mutationFn: async (invitationId: string) => {
-      await apiRequest(`/api/partnerships/${invitationId}/reject`, "PATCH");
+      await apiRequest("PATCH", `/api/partnerships/${invitationId}/reject`);
     },
     onSuccess: () => {
       toast({

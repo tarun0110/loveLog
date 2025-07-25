@@ -170,11 +170,16 @@ export default function MemoryDetailModal({
                   )}
                   <div className="flex-1">
                     <div className="bg-off-white rounded-2xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-sans text-xs font-semibold text-rose-primary">
+                          {comment.user.firstName || comment.user.email || 'Someone'}
+                        </span>
+                        <span className="text-xs text-brown-warm/60 font-sans">
+                          {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ''}
+                        </span>
+                      </div>
                       <p className="font-sans text-sm text-chocolate">{comment.content}</p>
                     </div>
-                    <p className="text-xs text-brown-warm/60 mt-1 font-sans">
-                      {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ''}
-                    </p>
                   </div>
                 </div>
               ))}
