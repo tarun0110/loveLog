@@ -4,8 +4,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
-import { Heart, Search, MapPin, Calendar, Star, Plus, LogOut } from "lucide-react";
+import { Heart, Search, MapPin, Calendar, Star, Plus, LogOut, Home, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 import MemoryCard from "@/components/memory-card";
 import MemoryDetailModal from "@/components/memory-detail-modal";
 import AddMemoryModal from "@/components/add-memory-modal";
@@ -158,6 +159,18 @@ export default function Timeline() {
             </div>
             
             <div className="flex items-center space-x-4">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
+                  <Home className="w-4 h-4 mr-2" />
+                  Home
+                </Button>
+              </Link>
+              <Link href="/profile">
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Button>
+              </Link>
               <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
                 <Search className="text-lg" />
               </Button>

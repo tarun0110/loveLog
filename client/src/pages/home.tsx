@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, History, Users, LogOut } from "lucide-react";
+import { Heart, History, Users, LogOut, User as UserIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import InvitePartnerModal from "@/components/invite-partner-modal";
@@ -57,12 +57,18 @@ export default function Home() {
             </div>
             
             <div className="flex items-center space-x-4">
+              <Link href="/profile">
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
+                  <UserIcon className="w-4 h-4 mr-2" />
+                  Profile
+                </Button>
+              </Link>
               <span className="font-sans text-chocolate">
-                Welcome, {(user as User)?.firstName || 'Love'}!
+                Welcome, {(user as any)?.firstName || 'Love'}!
               </span>
-              {(user as User)?.profileImageUrl && (
+              {(user as any)?.profileImageUrl && (
                 <img 
-                  src={(user as User).profileImageUrl!} 
+                  src={(user as any).profileImageUrl!} 
                   alt="Profile" 
                   className="w-8 h-8 rounded-full object-cover border-2 border-rose-primary"
                 />

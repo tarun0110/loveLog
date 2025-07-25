@@ -68,15 +68,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/partnerships/pending', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const invitations = await storage.getPendingInvitations(userId);
+      res.json(invitations);
+    } catch (error) {
+      console.error("Error fetching pending invitations:", error);
+      res.status(500).json({ message: "Failed to fetch invitations" });
+    }
+  });
+
   app.patch('/api/partnerships/:id/accept', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { id } = req.params;
 
-      // Verify user is part of this partnership
-      const partnership = await storage.getPartnership(userId, userId);
-      if (!partnership || partnership.id !== id) {
-        return res.status(403).json({ message: "Unauthorized" });
+      // Get the partnership to verify user can accept it
+      const invitations = await storage.getPendingInvitations(userId);
+      const invitation = invitations.find(inv => inv.id === id);
+      
+      if (!invitation) {
+        return res.status(403).json({ message: "Invitation not found or unauthorized" });
       }
 
       const updatedPartnership = await storage.updatePartnershipStatus(id, "active");
@@ -84,6 +97,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error accepting partnership:", error);
       res.status(500).json({ message: "Failed to accept partnership" });
+    }
+  });
+
+  app.patch('/api/partnerships/:id/reject', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+
+      // Get the partnership to verify user can reject it
+      const invitations = await storage.getPendingInvitations(userId);
+      const invitation = invitations.find(inv => inv.id === id);
+      
+      if (!invitation) {
+        return res.status(403).json({ message: "Invitation not found or unauthorized" });
+      }
+
+      const updatedPartnership = await storage.updatePartnershipStatus(id, "rejected");
+      res.json(updatedPartnership);
+    } catch (error) {
+      console.error("Error rejecting partnership:", error);
+      res.status(500).json({ message: "Failed to reject partnership" });
     }
   });
 

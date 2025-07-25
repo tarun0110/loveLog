@@ -29,6 +29,7 @@ export interface IStorage {
   createPartnership(partnership: InsertPartnership): Promise<Partnership>;
   getPartnership(userId1: string, userId2: string): Promise<Partnership | undefined>;
   getActivePartnership(userId: string): Promise<Partnership | undefined>;
+  getPendingInvitations(userId: string): Promise<(Partnership & { partner: User })[]>;
   updatePartnershipStatus(id: string, status: string): Promise<Partnership>;
   
   // Memory operations
@@ -107,6 +108,28 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return partnership;
+  }
+
+  async getPendingInvitations(userId: string): Promise<(Partnership & { partner: User })[]> {
+    const invitations = await db
+      .select({
+        id: partnerships.id,
+        user1Id: partnerships.user1Id,
+        user2Id: partnerships.user2Id,
+        status: partnerships.status,
+        createdAt: partnerships.createdAt,
+        updatedAt: partnerships.updatedAt,
+        partner: users,
+      })
+      .from(partnerships)
+      .innerJoin(users, eq(users.id, partnerships.user1Id))
+      .where(
+        and(
+          eq(partnerships.user2Id, userId),
+          eq(partnerships.status, "pending")
+        )
+      );
+    return invitations;
   }
 
   async updatePartnershipStatus(id: string, status: string): Promise<Partnership> {

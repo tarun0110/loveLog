@@ -1,0 +1,325 @@
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Check, X, User, Mail, Calendar, Heart } from "lucide-react";
+import { useEffect } from "react";
+import { isUnauthorizedError } from "@/lib/authUtils";
+
+interface PendingInvitation {
+  id: string;
+  user1Id: string;
+  user2Id: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  partner: {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    profileImageUrl?: string;
+  };
+}
+
+export default function Profile() {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, isLoading, toast]);
+
+  // Fetch pending invitations
+  const { data: invitations = [], isLoading: loadingInvitations } = useQuery<PendingInvitation[]>({
+    queryKey: ["/api/partnerships/pending"],
+    enabled: isAuthenticated,
+    retry: false,
+  });
+
+  // Accept invitation mutation
+  const acceptMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      await apiRequest(`/api/partnerships/${invitationId}/accept`, "PATCH");
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invitation Accepted",
+        description: "You are now partners! You can start creating memories together.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/partnerships/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/partnerships/active"] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to accept invitation. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Reject invitation mutation
+  const rejectMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      await apiRequest(`/api/partnerships/${invitationId}/reject`, "PATCH");
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invitation Rejected",
+        description: "The invitation has been declined.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/partnerships/pending"] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to reject invitation. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cream scrapbook-texture flex items-center justify-center">
+        <div className="text-center">
+          <Heart className="w-8 h-8 text-rose-primary animate-pulse mx-auto mb-4" />
+          <p className="text-chocolate font-sans">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return null; // Redirecting to login
+  }
+
+  return (
+    <div className="min-h-screen bg-cream scrapbook-texture p-6">
+      <div className="max-w-4xl mx-auto space-y-8">
+        
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="font-romantic text-4xl text-chocolate mb-4 handwriting-style">
+            Your Profile
+          </h1>
+          <p className="text-brown-warm/80 font-sans">
+            Manage your account and partnership invitations
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* Profile Information */}
+          <Card className="bg-off-white rounded-3xl polaroid-shadow drawing-decoration">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-chocolate font-romantic text-2xl">
+                <User className="w-6 h-6" />
+                <span>Profile Information</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              
+              {/* Profile Picture */}
+              <div className="flex justify-center">
+                {(user as any)?.profileImageUrl ? (
+                  <img
+                    src={(user as any).profileImageUrl}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-rose-primary polaroid-shadow"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-rose-primary/20 flex items-center justify-center border-4 border-rose-primary">
+                    <User className="w-8 h-8 text-rose-primary" />
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* User Details */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Mail className="w-5 h-5 text-brown-warm/60" />
+                  <div>
+                    <p className="text-sm font-sans text-brown-warm/60">Email</p>
+                    <p className="font-sans text-chocolate">{(user as any)?.email || "Not provided"}</p>
+                  </div>
+                </div>
+
+                {((user as any)?.firstName || (user as any)?.lastName) && (
+                  <div className="flex items-center space-x-3">
+                    <User className="w-5 h-5 text-brown-warm/60" />
+                    <div>
+                      <p className="text-sm font-sans text-brown-warm/60">Name</p>
+                      <p className="font-sans text-chocolate">
+                        {[(user as any)?.firstName, (user as any)?.lastName].filter(Boolean).join(" ")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-3">
+                  <Calendar className="w-5 h-5 text-brown-warm/60" />
+                  <div>
+                    <p className="text-sm font-sans text-brown-warm/60">Member Since</p>
+                    <p className="font-sans text-chocolate">
+                      {(user as any)?.createdAt ? new Date((user as any).createdAt).toLocaleDateString() : "Recently"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Actions */}
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => window.location.href = "/api/logout"}
+                >
+                  Sign Out
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Partnership Invitations */}
+          <Card className="bg-off-white rounded-3xl polaroid-shadow drawing-decoration">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-chocolate font-romantic text-2xl">
+                <Heart className="w-6 h-6" />
+                <span>Partnership Invitations</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingInvitations ? (
+                <div className="text-center py-8">
+                  <Heart className="w-8 h-8 text-rose-primary animate-pulse mx-auto mb-4" />
+                  <p className="text-brown-warm/60 font-sans">Loading invitations...</p>
+                </div>
+              ) : invitations.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-rose-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Heart className="w-8 h-8 text-rose-primary/60" />
+                  </div>
+                  <p className="text-brown-warm/60 font-sans mb-2">No pending invitations</p>
+                  <p className="text-sm text-brown-warm/40 font-sans">
+                    When someone invites you to be their partner, it will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {invitations.map((invitation) => (
+                    <div
+                      key={invitation.id}
+                      className="border border-rose-primary/20 rounded-2xl p-4 bg-cream/50"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          {invitation.partner.profileImageUrl ? (
+                            <img
+                              src={invitation.partner.profileImageUrl}
+                              alt="Partner"
+                              className="w-12 h-12 rounded-full object-cover border-2 border-rose-primary"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-rose-primary/20 flex items-center justify-center border-2 border-rose-primary">
+                              <User className="w-6 h-6 text-rose-primary" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-sans font-medium text-chocolate">
+                              {invitation.partner.firstName && invitation.partner.lastName
+                                ? `${invitation.partner.firstName} ${invitation.partner.lastName}`
+                                : invitation.partner.email}
+                            </p>
+                            <p className="text-sm text-brown-warm/60 font-sans">
+                              {invitation.partner.email}
+                            </p>
+                            <p className="text-xs text-brown-warm/40 font-sans">
+                              Invited {new Date(invitation.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                          Pending
+                        </Badge>
+                      </div>
+
+                      <p className="text-sm text-brown-warm/80 font-sans mb-4">
+                        {invitation.partner.firstName || "Someone"} wants to be your partner and start creating memories together!
+                      </p>
+
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          onClick={() => acceptMutation.mutate(invitation.id)}
+                          disabled={acceptMutation.isPending || rejectMutation.isPending}
+                          className="flex-1"
+                        >
+                          <Check className="w-4 h-4 mr-2" />
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => rejectMutation.mutate(invitation.id)}
+                          disabled={acceptMutation.isPending || rejectMutation.isPending}
+                          className="flex-1"
+                        >
+                          <X className="w-4 h-4 mr-2" />
+                          Decline
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
