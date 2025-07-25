@@ -20,7 +20,6 @@ export default function SearchFilters({
   filters,
   onFiltersChange
 }: SearchFiltersProps) {
-  
   const clearFilters = () => {
     onSearchChange("");
     onFiltersChange({});
