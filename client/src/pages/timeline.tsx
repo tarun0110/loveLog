@@ -35,7 +35,7 @@ export default function Timeline() {
   if (filters.dateFrom) queryParams.set('dateFrom', filters.dateFrom);
   if (filters.dateTo) queryParams.set('dateTo', filters.dateTo);
 
-  const { data: memories = [], isLoading: memoriesLoading, error } = useQuery({
+  const { data: memories = [], isLoading: memoriesLoading, error } = useQuery<MemoryWithDetails[]>({
     queryKey: ["/api/memories", queryParams.toString()],
     retry: false,
   });
@@ -165,9 +165,9 @@ export default function Timeline() {
                 <MapPin className="text-lg" />
               </Button>
               <div className="flex items-center space-x-2">
-                {user?.profileImageUrl && (
+                {(user as any)?.profileImageUrl && (
                   <img 
-                    src={user.profileImageUrl} 
+                    src={(user as any).profileImageUrl} 
                     alt="Your profile" 
                     className="w-8 h-8 rounded-full object-cover border-2 border-rose-primary"
                   />
@@ -229,7 +229,7 @@ export default function Timeline() {
             <MemoryCard
               key={memory.id}
               memory={memory}
-              currentUserId={user?.id || ''}
+              currentUserId={(user as any)?.id || ''}
               onExpand={() => setSelectedMemory(memory)}
               onApprove={() => approveMutation.mutate(memory.id)}
               onReject={() => rejectMutation.mutate(memory.id)}
@@ -242,7 +242,7 @@ export default function Timeline() {
             <MemoryCard
               key={memory.id}
               memory={memory}
-              currentUserId={user?.id || ''}
+              currentUserId={(user as any)?.id || ''}
               onExpand={() => setSelectedMemory(memory)}
             />
           ))}
@@ -291,7 +291,7 @@ export default function Timeline() {
       {selectedMemory && (
         <MemoryDetailModal
           memory={selectedMemory}
-          currentUserId={user?.id || ''}
+          currentUserId={(user as any)?.id || ''}
           onClose={() => setSelectedMemory(null)}
         />
       )}

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -7,12 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, History, Users, LogOut } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import InvitePartnerModal from "@/components/invite-partner-modal";
+import type { User } from "@shared/schema";
 
 export default function Home() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
-  const { data: partnership, isLoading: partnershipLoading } = useQuery({
+  const { data: partnership, isLoading: partnershipLoading } = useQuery<any>({
     queryKey: ["/api/partnerships/active"],
     retry: false,
   });
@@ -55,11 +58,11 @@ export default function Home() {
             
             <div className="flex items-center space-x-4">
               <span className="font-sans text-chocolate">
-                Welcome, {user?.firstName || 'Love'}!
+                Welcome, {(user as User)?.firstName || 'Love'}!
               </span>
-              {user?.profileImageUrl && (
+              {(user as User)?.profileImageUrl && (
                 <img 
-                  src={user.profileImageUrl} 
+                  src={(user as User).profileImageUrl!} 
                   alt="Profile" 
                   className="w-8 h-8 rounded-full object-cover border-2 border-rose-primary"
                 />
@@ -122,7 +125,10 @@ export default function Home() {
               <p className="font-sans text-brown-warm">
                 To start creating your love timeline, you need to connect with your partner.
               </p>
-              <Button className="bg-rose-primary hover:bg-rose-primary/80 text-chocolate font-sans font-semibold px-6 py-2 rounded-full">
+              <Button 
+                onClick={() => setShowInviteModal(true)}
+                className="bg-rose-primary hover:bg-rose-primary/80 text-chocolate font-sans font-semibold px-6 py-2 rounded-full"
+              >
                 <Heart className="mr-2 w-4 h-4" />
                 Invite Partner
               </Button>
@@ -130,6 +136,11 @@ export default function Home() {
           </Card>
         )}
       </main>
+
+      {/* Invite Partner Modal */}
+      {showInviteModal && (
+        <InvitePartnerModal onClose={() => setShowInviteModal(false)} />
+      )}
     </div>
   );
 }

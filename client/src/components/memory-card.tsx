@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Check, X, ExpandIcon, MapPin, Clock } from "lucide-react";
-import PhotoGallery from "./photo-gallery";
-import StarRating from "./star-rating";
+import PhotoGallery from "./ui/photo-gallery";
+import StarRating from "./ui/star-rating";
 import type { MemoryWithDetails } from "@shared/schema";
 
 interface MemoryCardProps {
@@ -25,7 +25,7 @@ export default function MemoryCard({
   const canApprove = isPendingMemory && memory.createdById !== currentUserId;
   
   return (
-    <div className="memory-card bg-off-white rounded-3xl p-6 polaroid-shadow relative">
+    <div className="memory-card drawing-decoration bg-off-white rounded-3xl p-6 polaroid-shadow relative">
       {/* Approval Badge */}
       {isPendingMemory && (
         <div className="absolute -top-3 -right-3 bg-yellow-400 text-white rounded-full p-2 text-xs font-sans font-semibold shadow-lg">

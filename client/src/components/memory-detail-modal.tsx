@@ -7,8 +7,8 @@ import { X, Heart } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import PhotoGallery from "./photo-gallery";
-import StarRating from "./star-rating";
+import PhotoGallery from "./ui/photo-gallery";
+import StarRating from "./ui/star-rating";
 import type { MemoryWithDetails } from "@shared/schema";
 
 interface MemoryDetailModalProps {
@@ -173,7 +173,7 @@ export default function MemoryDetailModal({
                       <p className="font-sans text-sm text-chocolate">{comment.content}</p>
                     </div>
                     <p className="text-xs text-brown-warm/60 mt-1 font-sans">
-                      {new Date(comment.createdAt).toLocaleString()}
+                      {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ''}
                     </p>
                   </div>
                 </div>

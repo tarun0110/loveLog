@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Caveat:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,12 +99,33 @@
     border-color: hsl(327, 73%, 85%);
   }
 
-  /* Scrapbook texture background */
+  /* Enhanced scrapbook texture background with drawing aesthetics */
   .scrapbook-texture {
     background-image: 
-      radial-gradient(circle at 25% 25%, rgba(248, 187, 217, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(232, 180, 184, 0.1) 0%, transparent 50%),
-      linear-gradient(45deg, transparent 49%, rgba(248, 187, 217, 0.02) 50%, transparent 51%);
+      /* Paper texture layers */
+      radial-gradient(circle at 25% 25%, rgba(248, 187, 217, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(232, 180, 184, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 10% 90%, rgba(139, 69, 19, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(248, 187, 217, 0.12) 0%, transparent 45%),
+      /* Drawing-like texture lines */
+      linear-gradient(45deg, transparent 49%, rgba(248, 187, 217, 0.05) 50%, transparent 51%),
+      linear-gradient(-45deg, transparent 49%, rgba(232, 180, 184, 0.03) 50%, transparent 51%),
+      /* Paper fiber texture */
+      repeating-linear-gradient(
+        0deg, 
+        transparent, 
+        transparent 2px, 
+        rgba(139, 69, 19, 0.02) 2px, 
+        rgba(139, 69, 19, 0.02) 4px
+      ),
+      repeating-linear-gradient(
+        90deg, 
+        transparent, 
+        transparent 2px, 
+        rgba(248, 187, 217, 0.02) 2px, 
+        rgba(248, 187, 217, 0.02) 4px
+      );
+    background-size: 200px 200px, 150px 150px, 300px 300px, 250px 250px, 80px 80px, 100px 100px, 4px 4px, 4px 4px;
   }
   
   /* Polaroid shadow effect */
@@ -113,10 +136,11 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
   
-  /* Memory card animations */
+  /* Memory card animations and timeline connector */
   .memory-card {
     transform: rotate(-1deg);
     transition: all 0.3s ease;
+    position: relative;
   }
   
   .memory-card:nth-child(even) {
@@ -126,6 +150,52 @@
   .memory-card:hover {
     transform: rotate(0deg) scale(1.02);
     z-index: 10;
+  }
+
+  /* Timeline connector - dotted wave line */
+  .memory-card:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 60px;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      hsl(327, 73%, 85%) 3px,
+      hsl(327, 73%, 85%) 6px,
+      transparent 6px,
+      transparent 9px
+    );
+    border-radius: 50px;
+    opacity: 0.6;
+    z-index: 1;
+  }
+
+  /* Drawing-like decorative elements */
+  .drawing-decoration::before {
+    content: '✦';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    color: hsl(327, 73%, 85%);
+    font-size: 1.2rem;
+    opacity: 0.7;
+    transform: rotate(15deg);
+  }
+
+  .drawing-decoration::after {
+    content: '♡';
+    position: absolute;
+    bottom: -8px;
+    left: -8px;
+    color: hsl(15, 25%, 15%);
+    font-size: 0.9rem;
+    opacity: 0.5;
+    transform: rotate(-10deg);
   }
   
   /* Handwriting style text shadow */
@@ -155,5 +225,4 @@
   }
 }
 
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Caveat:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+

@@ -9,7 +9,7 @@ import { X, Heart, Upload } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import StarRating from "./star-rating";
+import StarRating from "./ui/star-rating";
 
 interface AddMemoryModalProps {
   onClose: () => void;
