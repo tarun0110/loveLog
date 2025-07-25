@@ -154,6 +154,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
   );
 
+  // Get all partnerships (for homepage)
+  app.get("/api/partnerships", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const partnerships = await storage.getAllPartnerships(userId);
+      res.json(partnerships);
+    } catch (error) {
+      console.error("Error fetching partnerships:", error);
+      res.status(500).json({ message: "Failed to fetch partnerships" });
+    }
+  });
+
+  // End partnership
+  app.patch("/api/partnerships/:id/end", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+
+      // Verify user is part of this partnership
+      const partnerships = await storage.getAllPartnerships(userId);
+      const partnership = partnerships.find(p => p.id === id);
+      
+      if (!partnership) {
+        return res.status(403).json({ message: "Partnership not found or unauthorized" });
+      }
+
+      if (partnership.status === "ended") {
+        return res.status(400).json({ message: "Partnership is already ended" });
+      }
+
+      const updatedPartnership = await storage.endPartnership(id, userId);
+      res.json(updatedPartnership);
+    } catch (error) {
+      console.error("Error ending partnership:", error);
+      res.status(500).json({ message: "Failed to end partnership" });
+    }
+  });
+
+  // Delete partnership
+  app.delete("/api/partnerships/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+
+      // Verify user is part of this partnership and it's ended
+      const partnerships = await storage.getAllPartnerships(userId);
+      const partnership = partnerships.find(p => p.id === id);
+      
+      if (!partnership) {
+        return res.status(403).json({ message: "Partnership not found or unauthorized" });
+      }
+
+      if (partnership.status !== "ended") {
+        return res.status(400).json({ message: "Can only delete ended partnerships" });
+      }
+
+      await storage.deletePartnership(id);
+      res.json({ message: "Partnership deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting partnership:", error);
+      res.status(500).json({ message: "Failed to delete partnership" });
+    }
+  });
+
   // Memory routes
   app.get("/api/memories", isAuthenticated, async (req: any, res) => {
     try {

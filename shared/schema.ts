@@ -44,6 +44,8 @@ export const partnerships = pgTable("partnerships", {
   status: varchar("status").notNull().default("pending"), // pending, active, ended
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  endedAt: timestamp("ended_at"),
+  endedBy: varchar("ended_by").references(() => users.id),
 });
 
 // Date memories/timeline entries

@@ -29,8 +29,11 @@ export interface IStorage {
   createPartnership(partnership: InsertPartnership): Promise<Partnership>;
   getPartnership(userId1: string, userId2: string): Promise<Partnership | undefined>;
   getActivePartnership(userId: string): Promise<Partnership | undefined>;
+  getAllPartnerships(userId: string): Promise<(Partnership & { partner: User })[]>;
   getPendingInvitations(userId: string): Promise<(Partnership & { partner: User })[]>;
   updatePartnershipStatus(id: string, status: string): Promise<Partnership>;
+  endPartnership(partnershipId: string, endedBy: string): Promise<Partnership>;
+  deletePartnership(partnershipId: string): Promise<void>;
   
   // Memory operations
   createMemory(memory: InsertMemory): Promise<Memory>;
@@ -119,6 +122,8 @@ export class DatabaseStorage implements IStorage {
         status: partnerships.status,
         createdAt: partnerships.createdAt,
         updatedAt: partnerships.updatedAt,
+        endedAt: partnerships.endedAt,
+        endedBy: partnerships.endedBy,
         partner: users,
       })
       .from(partnerships)
@@ -139,6 +144,60 @@ export class DatabaseStorage implements IStorage {
       .where(eq(partnerships.id, id))
       .returning();
     return partnership;
+  }
+
+  async getAllPartnerships(userId: string): Promise<(Partnership & { partner: User })[]> {
+    const allPartnerships = await db
+      .select()
+      .from(partnerships)
+      .where(
+        or(
+          eq(partnerships.user1Id, userId),
+          eq(partnerships.user2Id, userId)
+        )
+      )
+      .orderBy(desc(partnerships.createdAt));
+
+    const partnershipsWithUsers = await Promise.all(
+      allPartnerships.map(async (partnership) => {
+        // Determine which user is the partner
+        const partnerId = partnership.user1Id === userId 
+          ? partnership.user2Id 
+          : partnership.user1Id;
+        
+        const [partner] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, partnerId));
+
+        return {
+          ...partnership,
+          partner
+        };
+      })
+    );
+
+    return partnershipsWithUsers;
+  }
+
+  async endPartnership(partnershipId: string, endedBy: string): Promise<Partnership> {
+    const [partnership] = await db
+      .update(partnerships)
+      .set({
+        status: "ended",
+        endedAt: new Date(),
+        endedBy: endedBy,
+        updatedAt: new Date(),
+      })
+      .where(eq(partnerships.id, partnershipId))
+      .returning();
+    return partnership;
+  }
+
+  async deletePartnership(partnershipId: string): Promise<void> {
+    await db
+      .delete(partnerships)
+      .where(eq(partnerships.id, partnershipId));
   }
 
   // Memory operations
