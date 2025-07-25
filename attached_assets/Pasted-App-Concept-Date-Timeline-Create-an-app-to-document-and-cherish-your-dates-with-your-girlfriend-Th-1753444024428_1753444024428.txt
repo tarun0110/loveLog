@@ -1,0 +1,26 @@
+App Concept: Date Timeline
+Create an app to document and cherish your dates with your girlfriend. The app will feature:
+Timeline View: A visually appealing timeline showcasing all your dates in chronological order.
+Photos: Upload and display photos from each date to relive the memories.
+Brief Summary: Add a short summary for each date, highlighting key moments.
+Detailed Description: Write a detailed description to capture the essence of the experience.
+Ratings: Rate the food, place, and overall experience to keep track of great spots and places to avoid.
+Search and Filter: Easily search and filter dates by location, rating, or keywords.
+Interactive Map: View all the places you've visited on an interactive map.
+Private and Secure: Ensure your memories are safe with privacy settings and secure storage.
+This app will serve as a fun and meaningful way to preserve your memories while also being a practical tool for future planning.
+This app is designed as a timeline of cherished memories shared with a significant other, with room for future enhancements.
+Key Features:
+Collaborative Timeline: Both partners contribute to a shared timeline, with individual profiles resembling dating app profile cards. By default, profiles and timelines are private. Any additions require approval from the other partner before being published.
+Interactive Cards: Each card features photos (swipeable to view all), a short description, title, and date. Clicking on a card opens a detailed view with a longer description and a comments section.
+Scrapbook Aesthetic: A charming background that evokes the feel of a scrapbook.
+Advanced Filters: Filter memories by date, time, place, or food.
+Search Functionality: Quickly locate specific memories using a search bar.
+Future Plans:
+Public Pages: Users can make their timelines public, which will then appear on the app's Discover tab.
+Internal Ratings: With a growing user base, the app can provide internal ratings for places and cafes, offering specific recommendations.
+Influencer Engagement: Collaborate with influencer couples to enhance app visibility.
+Partnerships: Partner with restaurants and cafes to offer discount coupons to users.
+Sponsored Content: Display sponsorship ads for relevant places and services.
+User Insights: Leverage user spending data to show targeted ads and sell special date-related goods, such as Valentine's Day gifts.
+Breakup Feature: In the event of a breakup, partners can rate each other. While these ratings remain private, aggregated data could potentially inform a future dating app feature.
