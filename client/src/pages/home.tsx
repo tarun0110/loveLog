@@ -123,25 +123,25 @@ export default function Home() {
       <nav className="bg-off-white/95 backdrop-blur-sm shadow-sm border-b border-rose-primary/20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <Heart className="text-rose-primary text-2xl" />
-              <h1 className="font-romantic text-2xl text-chocolate font-bold">LoveTimeline</h1>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Heart className="text-rose-primary text-xl sm:text-2xl" />
+              <h1 className="font-romantic text-lg sm:text-2xl text-chocolate font-bold">LoveTimeline</h1>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
             <Link href="/timeline">
-                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
-                  <UserIcon className="w-4 h-4 mr-2" />
-                  Timeline
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary p-2">
+                  <UserIcon className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Timeline</span>
                 </Button>
               </Link>
               <Link href="/profile">
-                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
-                  <UserIcon className="w-4 h-4 mr-2" />
-                  Profile
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary p-2">
+                  <UserIcon className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Profile</span>
                 </Button>
               </Link>
-              <span className="font-sans text-chocolate">
+              <span className="font-sans text-chocolate text-sm hidden md:inline">
                 Welcome, {(user as any)?.firstName || 'Love'}!
               </span>
               {(user as any)?.profileImageUrl && (
@@ -155,7 +155,7 @@ export default function Home() {
                 onClick={() => window.location.href = '/api/logout'}
                 variant="ghost"
                 size="sm"
-                className="text-chocolate hover:text-rose-primary"
+                className="text-chocolate hover:text-rose-primary p-2"
               >
                 <LogOut className="w-4 h-4" />
               </Button>
@@ -164,12 +164,12 @@ export default function Home() {
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-12">
-          <h2 className="font-romantic text-4xl md:text-5xl text-chocolate mb-4 handwriting-style">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="font-romantic text-2xl sm:text-4xl md:text-5xl text-chocolate mb-4 handwriting-style">
             Your Love Story Dashboard
           </h2>
-          <p className="font-sans text-brown-warm/80 text-lg">
+          <p className="font-sans text-brown-warm/80 text-base sm:text-lg px-4">
             Welcome to your shared timeline of beautiful memories
           </p>
         </div>
@@ -191,20 +191,20 @@ export default function Home() {
                     p.status === 'ended' ? 'border-red-300 bg-red-50' : 
                     'border-yellow-300 bg-yellow-50'
                   }`}>
-                    <div className="flex justify-between items-start mb-3">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-3">
                       <div className="flex items-center space-x-3">
                         {p.partner?.profileImageUrl && (
                           <img 
                             src={p.partner.profileImageUrl} 
                             alt={`${p.partner.firstName || 'Partner'}'s profile`}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-rose-primary"
+                            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-rose-primary flex-shrink-0"
                           />
                         )}
-                        <div>
-                          <h3 className="font-sans font-semibold text-chocolate">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-sans font-semibold text-chocolate text-sm sm:text-base truncate">
                             {p.partner?.firstName} {p.partner?.lastName}
                           </h3>
-                          <p className="text-sm text-brown-warm/80">{p.partner?.email}</p>
+                          <p className="text-xs sm:text-sm text-brown-warm/80 truncate">{p.partner?.email}</p>
                           <p className="text-xs text-brown-warm/60">
                             {p.status === 'active' ? 'Active Partnership' : 
                              p.status === 'ended' ? 'Ended Partnership' : 
@@ -212,13 +212,13 @@ export default function Home() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex flex-col space-y-2">
+                      <div className="flex flex-row sm:flex-col gap-2 sm:space-y-2 sm:gap-0 flex-wrap sm:flex-nowrap">
                         {p.status === 'active' && (
                           <>
                             <Link href="/timeline">
-                              <Button size="sm" className="bg-rose-primary hover:bg-rose-primary/80 text-chocolate font-sans">
-                                <History className="mr-1 w-4 h-4" />
-                                View Timeline
+                              <Button size="sm" className="bg-rose-primary hover:bg-rose-primary/80 text-chocolate font-sans text-xs sm:text-sm whitespace-nowrap">
+                                <History className="mr-1 w-3 h-3 sm:w-4 sm:h-4" />
+                                <span className="hidden xs:inline">View </span>Timeline
                               </Button>
                             </Link>
                             <Button 
@@ -226,16 +226,16 @@ export default function Home() {
                               variant="destructive"
                               onClick={() => endPartnershipMutation.mutate(p.id)}
                               disabled={endPartnershipMutation.isPending}
-                              className="bg-red-500 hover:bg-red-600 text-white"
+                              className="bg-red-500 hover:bg-red-600 text-white text-xs sm:text-sm whitespace-nowrap"
                             >
-                              <UserX className="mr-1 w-4 h-4" />
-                              End Partnership
+                              <UserX className="mr-1 w-3 h-3 sm:w-4 sm:h-4" />
+                              <span className="hidden xs:inline">End </span>Partnership
                             </Button>
                           </>
                         )}
                         {p.status === 'ended' && (
-                          <div className="space-y-2">
-                            <p className="text-xs text-red-600 font-medium">
+                          <div className="space-y-2 w-full sm:w-auto">
+                            <p className="text-xs text-red-600 font-medium text-center sm:text-left">
                               Partnership Ended
                               {p.endedAt && (
                                 <span className="block text-brown-warm/60">
@@ -248,9 +248,9 @@ export default function Home() {
                               variant="outline"
                               onClick={() => deletePartnershipMutation.mutate(p.id)}
                               disabled={deletePartnershipMutation.isPending}
-                              className="border-red-300 text-red-600 hover:bg-red-50"
+                              className="border-red-300 text-red-600 hover:bg-red-50 text-xs sm:text-sm w-full sm:w-auto"
                             >
-                              <Trash2 className="mr-1 w-4 h-4" />
+                              <Trash2 className="mr-1 w-3 h-3 sm:w-4 sm:h-4" />
                               Remove
                             </Button>
                           </div>

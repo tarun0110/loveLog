@@ -99,6 +99,13 @@
     border-color: hsl(327, 73%, 85%);
   }
 
+  /* Mobile-specific utilities */
+  @media (max-width: 475px) {
+    .xs\:inline { display: inline; }
+    .xs\:block { display: block; }
+    .xs\:hidden { display: none; }
+  }
+
   /* Enhanced scrapbook texture background with drawing aesthetics */
   .scrapbook-texture {
     background-image: 

@@ -8,12 +8,17 @@ interface PhotoGalleryProps {
   className?: string;
 }
 
-export default function PhotoGallery({ photos, className = "" }: PhotoGalleryProps) {
+export default function PhotoGallery({
+  photos,
+  className = "",
+}: PhotoGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   if (!photos.length) {
     return (
-      <div className={`flex items-center justify-center h-48 bg-cream-bg/50 rounded-xl ${className}`}>
+      <div
+        className={`flex items-center justify-center h-48 bg-cream-bg/50 rounded-xl ${className}`}
+      >
         <p className="text-brown-warm/50 font-sans">No photos</p>
       </div>
     );
@@ -30,12 +35,12 @@ export default function PhotoGallery({ photos, className = "" }: PhotoGalleryPro
   return (
     <div className={`relative ${className}`}>
       <div className="relative overflow-hidden rounded-xl">
-        <img 
-          src={photos[currentIndex].url} 
+        <img
+          src={photos[currentIndex].url}
           alt={photos[currentIndex].caption || `Photo ${currentIndex + 1}`}
           className="w-full h-48 object-cover polaroid-shadow"
         />
-        
+
         {photos.length > 1 && (
           <>
             <Button
@@ -57,7 +62,7 @@ export default function PhotoGallery({ photos, className = "" }: PhotoGalleryPro
           </>
         )}
       </div>
-      
+
       {photos.length > 1 && (
         <div className="flex justify-center mt-2">
           <div className="flex space-x-2">
@@ -66,7 +71,9 @@ export default function PhotoGallery({ photos, className = "" }: PhotoGalleryPro
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={`w-2 h-2 rounded-full transition-all ${
-                  index === currentIndex ? 'bg-rose-primary' : 'bg-rose-primary/30'
+                  index === currentIndex
+                    ? "bg-rose-primary"
+                    : "bg-rose-primary/30"
                 }`}
               />
             ))}

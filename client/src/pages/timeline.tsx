@@ -166,35 +166,33 @@ export default function Timeline() {
       <nav className="bg-off-white/95 backdrop-blur-sm shadow-sm border-b border-rose-primary/20 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <Heart className="text-rose-primary text-2xl" />
-              <h1 className="font-romantic text-2xl text-chocolate font-bold">LoveTimeline</h1>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Heart className="text-rose-primary text-xl sm:text-2xl" />
+              <h1 className="font-romantic text-lg sm:text-2xl text-chocolate font-bold">LoveTimeline</h1>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-1 sm:space-x-4">
               <Link href="/">
-                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
-                  <Home className="w-4 h-4 mr-2" />
-                  Home
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary p-2">
+                  <Home className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Home</span>
                 </Button>
               </Link>
               <Link href="/profile">
-                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary p-2">
+                  <User className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Profile</span>
                 </Button>
               </Link>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-chocolate hover:text-rose-primary"
+                className="text-chocolate hover:text-rose-primary p-2"
                 onClick={() => setShowSearch(!showSearch)}
               >
-                <Search className="text-lg" />
+                <Search className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
-                <MapPin className="text-lg" />
-              </Button>
+              
               <div className="flex items-center space-x-2">
                 {(user as any)?.profileImageUrl && (
                   <img 
@@ -218,29 +216,29 @@ export default function Timeline() {
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Timeline Header */}
-        <div className="text-center mb-12">
-          <h2 className="font-romantic text-4xl md:text-5xl text-chocolate mb-4 handwriting-style">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="font-romantic text-2xl sm:text-4xl md:text-5xl text-chocolate mb-4 handwriting-style">
             Our Love Story
           </h2>
-          <p className="font-sans text-brown-warm/80 text-lg mb-6">
+          <p className="font-sans text-brown-warm/80 text-base sm:text-lg mb-6 px-4">
             Cherishing every moment of our beautiful journey together
           </p>
           
           {/* Timeline Stats */}
-          <div className="flex justify-center space-x-8 mb-8">
+          <div className="grid grid-cols-3 gap-4 sm:flex sm:justify-center sm:space-x-8 mb-8">
             <div className="text-center">
-              <div className="text-2xl font-bold text-chocolate">{totalDates}</div>
-              <div className="text-sm text-brown-warm font-sans">Amazing Dates</div>
+              <div className="text-xl sm:text-2xl font-bold text-chocolate">{totalDates}</div>
+              <div className="text-xs sm:text-sm text-brown-warm font-sans">Amazing Dates</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-chocolate">{totalPhotos}</div>
-              <div className="text-sm text-brown-warm font-sans">Beautiful Photos</div>
+              <div className="text-xl sm:text-2xl font-bold text-chocolate">{totalPhotos}</div>
+              <div className="text-xs sm:text-sm text-brown-warm font-sans">Beautiful Photos</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-chocolate">∞</div>
-              <div className="text-sm text-brown-warm font-sans">Love Forever</div>
+              <div className="text-xl sm:text-2xl font-bold text-chocolate">∞</div>
+              <div className="text-xs sm:text-sm text-brown-warm font-sans">Love Forever</div>
             </div>
           </div>
         </div>
