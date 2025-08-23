@@ -8,15 +8,22 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+if (!process.env.GOOGLE_CLIENT_ID) {
+  throw new Error("Environment variable GOOGLE_CLIENT_ID not provided");
+}
+if (!process.env.GOOGLE_CLIENT_SECRET) {
+  throw new Error("Environment variable GOOGLE_CLIENT_SECRET not provided");
+}
+if (!process.env.GOOGLE_ISSUER_URL) {
+ throw new Error("Environment variable GOOGLE_ISSUER_URL not provided");
 }
 
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
+      new URL(process.env.GOOGLE_ISSUER_URL!),
+      process.env.GOOGLE_CLIENT_ID!,
+      process.env.GOOGLE_CLIENT_SECRET!
     );
   },
   { maxAge: 3600 * 1000 }
@@ -84,42 +91,39 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
-      },
-      verify,
-    );
-    passport.use(strategy);
-  }
+  const strategy = new Strategy(
+    {
+      name: 'google',
+      config,
+      scope: "openid email profile offline_access",
+      callbackURL: `https://localhost:5000/api/callback`,
+    }, 
+    verify,
+  );
 
+  passport.use(strategy);
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    passport.authenticate('google', {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
-  app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+  app.get("/api/callback", passport.authenticate('google', {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
-    })(req, res, next);
-  });
+  }));
 
   app.get("/api/logout", (req, res) => {
+    // Note: Google's OIDC does not require an end session endpoint for typical logout
+    // Clearing the local session is usually sufficient.
     req.logout(() => {
       res.redirect(
         client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
+          client_id: process.env.GOOGLE_CLIENT_ID!,
           post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
         }).href
       );
