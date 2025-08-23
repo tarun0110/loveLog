@@ -25,29 +25,29 @@ export default function MemoryCard({
   const canApprove = isPendingMemory && memory.createdById !== currentUserId;
   
   return (
-    <div className="memory-card drawing-decoration bg-off-white rounded-3xl p-6 polaroid-shadow relative">
+    <div className="memory-card drawing-decoration bg-off-white rounded-3xl p-4 sm:p-6 polaroid-shadow relative">
       {/* Approval Badge */}
       {isPendingMemory && (
-        <div className="absolute -top-3 -right-3 bg-yellow-400 text-white rounded-full p-2 text-xs font-sans font-semibold shadow-lg">
-          <Clock className="w-4 h-4 mr-1 inline" />
-          Pending
+        <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-yellow-400 text-white rounded-full p-1 sm:p-2 text-xs font-sans font-semibold shadow-lg">
+          <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 inline" />
+          <span className="hidden sm:inline">Pending</span>
         </div>
       )}
       
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
         {/* Photo Gallery */}
         <div className="lg:w-1/2">
           <PhotoGallery photos={memory.photos} />
         </div>
         
         {/* Memory Details */}
-        <div className="lg:w-1/2 space-y-4">
+        <div className="lg:w-1/2 space-y-3 sm:space-y-4">
           <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-romantic text-2xl text-chocolate mb-2 handwriting-style">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-romantic text-xl sm:text-2xl text-chocolate mb-2 handwriting-style break-words">
                 {memory.title}
               </h3>
-              <p className="text-brown-warm/80 font-sans text-sm">
+              <p className="text-brown-warm/80 font-sans text-xs sm:text-sm">
                 {new Date(memory.dateOfMemory).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -59,33 +59,33 @@ export default function MemoryCard({
               variant="ghost"
               size="sm"
               onClick={onExpand}
-              className="text-brown-warm/60 hover:text-rose-primary"
+              className="text-brown-warm/60 hover:text-rose-primary p-2 flex-shrink-0"
             >
-              <ExpandIcon className="text-lg" />
+              <ExpandIcon className="w-4 h-4 sm:text-lg" />
             </Button>
           </div>
           
-          <p className="text-chocolate font-sans leading-relaxed">
+          <p className="text-chocolate font-sans leading-relaxed text-sm sm:text-base">
             {memory.description}
           </p>
           
           {/* Ratings */}
-          <div className="space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             {memory.foodRating && (
               <div className="flex items-center justify-between">
-                <span className="font-sans text-sm text-brown-warm">Food</span>
+                <span className="font-sans text-xs sm:text-sm text-brown-warm">Food</span>
                 <StarRating rating={memory.foodRating} readonly />
               </div>
             )}
             {memory.placeRating && (
               <div className="flex items-center justify-between">
-                <span className="font-sans text-sm text-brown-warm">Place</span>
+                <span className="font-sans text-xs sm:text-sm text-brown-warm">Place</span>
                 <StarRating rating={memory.placeRating} readonly />
               </div>
             )}
             {memory.overallRating && (
               <div className="flex items-center justify-between">
-                <span className="font-sans text-sm text-brown-warm">Overall</span>
+                <span className="font-sans text-xs sm:text-sm text-brown-warm">Overall</span>
                 <StarRating rating={memory.overallRating} readonly />
               </div>
             )}
@@ -93,30 +93,30 @@ export default function MemoryCard({
           
           {/* Location */}
           {memory.location && (
-            <div className="flex items-center text-brown-warm/80 font-sans text-sm">
-              <MapPin className="w-4 h-4 mr-2" />
-              <span>{memory.location}</span>
+            <div className="flex items-center text-brown-warm/80 font-sans text-xs sm:text-sm">
+              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
+              <span className="truncate">{memory.location}</span>
             </div>
           )}
           
           {/* Added by */}
-          <div className="flex items-center justify-between pt-4 border-t border-rose-primary/20">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-3 sm:pt-4 border-t border-rose-primary/20 gap-3">
             <div className="flex items-center">
               <span className="font-sans text-xs text-brown-warm/60">Added by</span>
               {memory.createdBy.profileImageUrl && (
                 <img 
                   src={memory.createdBy.profileImageUrl} 
                   alt="Added by" 
-                  className="w-6 h-6 rounded-full object-cover ml-2"
+                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover ml-2 flex-shrink-0"
                 />
               )}
-              <span className="font-sans text-xs text-brown-warm/80 ml-2">
+              <span className="font-sans text-xs text-brown-warm/80 ml-2 truncate">
                 {memory.createdBy.firstName || 'Partner'}
               </span>
             </div>
             
             {canApprove && onApprove && onReject ? (
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 self-start sm:self-auto">
                 <Button
                   size="sm"
                   onClick={onApprove}
@@ -136,7 +136,7 @@ export default function MemoryCard({
                 </Button>
               </div>
             ) : memory.status === 'approved' ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 self-start sm:self-auto">
                 <Check className="w-4 h-4 text-rose-primary" />
                 <span className="font-sans text-xs text-brown-warm/60">Approved</span>
               </div>

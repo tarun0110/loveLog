@@ -28,8 +28,8 @@ export default function SearchFilters({
   const hasActiveFilters = searchQuery || Object.keys(filters).some(key => filters[key as keyof typeof filters]);
 
   return (
-    <div className="bg-off-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 polaroid-shadow">
-      <div className="space-y-4">
+    <div className="bg-off-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 polaroid-shadow">
+      <div className="space-y-3 sm:space-y-4">
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-brown-warm/50 w-4 h-4" />
@@ -38,7 +38,7 @@ export default function SearchFilters({
             placeholder="Search your memories..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 bg-cream-bg/50 border-rose-primary/30 focus:ring-rose-primary/50 font-sans"
+            className="pl-10 bg-cream-bg/50 border-rose-primary/30 focus:ring-rose-primary/50 font-sans text-sm sm:text-base"
           />
         </div>
 
@@ -51,9 +51,9 @@ export default function SearchFilters({
               ...filters, 
               rating: filters.rating === 5 ? undefined : 5 
             })}
-            className="rounded-full font-sans text-sm bg-rose-primary/20 hover:bg-rose-primary/30 border-rose-primary/30"
+            className="rounded-full font-sans text-xs sm:text-sm bg-rose-primary/20 hover:bg-rose-primary/30 border-rose-primary/30"
           >
-            <Star className="w-4 h-4 mr-2" />
+            <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             5 Stars
           </Button>
           
@@ -70,10 +70,10 @@ export default function SearchFilters({
                   : lastMonth.toISOString().split('T')[0]
               });
             }}
-            className="rounded-full font-sans text-sm bg-rose-primary/20 hover:bg-rose-primary/30 border-rose-primary/30"
+            className="rounded-full font-sans text-xs sm:text-sm bg-rose-primary/20 hover:bg-rose-primary/30 border-rose-primary/30"
           >
-            <Calendar className="w-4 h-4 mr-2" />
-            Last Month
+            <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Last </span>Month
           </Button>
 
           {hasActiveFilters && (

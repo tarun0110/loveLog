@@ -5,6 +5,12 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
+// print on the terminal 
+console.log("database url = ", process.env.DATABASE_URL);
 if (!process.env.DATABASE_URL) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?",

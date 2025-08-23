@@ -46,8 +46,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         partner.id,
       );
-      if (existingPartnership) {
+      console.error(existingPartnership);
+      if (existingPartnership && existingPartnership.status == "active") {
         return res.status(400).json({ message: "Partnership already exists" });
+      }
+
+      if (existingPartnership && existingPartnership.status == "pending") {
+        return res.status(400).json({ message: "Invitation already sent and pending" });
       }
 
       const partnershipData = insertPartnershipSchema.parse({
