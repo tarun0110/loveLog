@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Check, X, User, Mail, Calendar, Heart } from "lucide-react";
+import { Check, X, Mail } from "lucide-react";
 import { useEffect } from "react";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { Link } from "wouter";
+import { Heart, Search, MapPin, Calendar, Star, Plus, LogOut, Home, User } from "lucide-react";
 
 interface PendingInvitation {
   id: string;
@@ -135,7 +137,60 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-cream scrapbook-texture p-6">
+    <div className="min-h-screen bg-cream-bg scrapbook-texture">
+      {/* Navigation */}
+      <nav className="bg-off-white/95 backdrop-blur-sm shadow-sm border-b border-rose-primary/20 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <Heart className="text-rose-primary text-2xl" />
+              <h1 className="font-romantic text-2xl text-chocolate font-bold">LoveTimeline</h1>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
+                  <Home className="w-4 h-4 mr-2" />
+                  Home
+                </Button>
+              </Link>
+              <Link href="/timeline">
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
+                  <User className="w-4 h-4 mr-2" />
+                  Timeline
+                </Button>
+              </Link>
+              <Link href="/profile">
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Button>
+              </Link>
+              <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
+                <MapPin className="text-lg" />
+              </Button>
+              <div className="flex items-center space-x-2">
+                {(user as any)?.profileImageUrl && (
+                  <img 
+                    src={(user as any).profileImageUrl} 
+                    alt="Your profile" 
+                    className="w-8 h-8 rounded-full object-cover border-2 border-rose-primary"
+                  />
+                )}
+                {/* Partner would be shown here if available */}
+              </div>
+              <Button 
+                onClick={() => window.location.href = '/api/logout'}
+                variant="ghost"
+                size="sm"
+                className="text-chocolate hover:text-rose-primary"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Header */}

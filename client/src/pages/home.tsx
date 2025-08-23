@@ -129,6 +129,12 @@ export default function Home() {
             </div>
             
             <div className="flex items-center space-x-4">
+            <Link href="/timeline">
+                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
+                  <UserIcon className="w-4 h-4 mr-2" />
+                  Timeline
+                </Button>
+              </Link>
               <Link href="/profile">
                 <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary">
                   <UserIcon className="w-4 h-4 mr-2" />
