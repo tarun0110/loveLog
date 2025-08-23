@@ -95,8 +95,8 @@ export async function setupAuth(app: Express) {
     {
       name: 'google',
       config,
-      scope: "openid email profile offline_access",
-      callbackURL: `https://localhost:5000/api/callback`,
+      scope: "openid email profile",
+      callbackURL: process.env.DOMAIN + '/api/callback',
     }, 
     verify,
   );
@@ -108,25 +108,20 @@ export async function setupAuth(app: Express) {
   app.get("/api/login", (req, res, next) => {
     passport.authenticate('google', {
       prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"],
+      scope: ["openid", "email", "profile"],
     })(req, res, next);
   });
 
   app.get("/api/callback", passport.authenticate('google', {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
+      successReturnToOrRedirect: "/timeline",
+      failureRedirect: "/",
   }));
 
   app.get("/api/logout", (req, res) => {
-    // Note: Google's OIDC does not require an end session endpoint for typical logout
-    // Clearing the local session is usually sufficient.
+    // Clearing the local session is usually sufficient for Google logout.
     req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.GOOGLE_CLIENT_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
+      // Redirect to the root path after logging out.
+      res.redirect("/");
     });
   });
 }
