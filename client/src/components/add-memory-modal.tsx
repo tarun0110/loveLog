@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,8 @@ export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalPro
   const [placeRating, setPlaceRating] = useState(0);
   const [overallRating, setOverallRating] = useState(0);
   const [photos, setPhotos] = useState<{ url: string; caption: string }[]>([]);
-  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { toast } = useToast();
 
   const createMemoryMutation = useMutation({
@@ -60,9 +61,39 @@ export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalPro
     },
   });
 
+  const uploadPhotoMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("photo", file);
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to upload photo");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      const caption = prompt("Enter photo caption (optional):") || "";
+      setPhotos([...photos, { url: data.url, caption }]);
+      toast({
+        title: "Photo Uploaded",
+        description: "Your photo has been successfully uploaded.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Upload Error",
+        description: "Failed to upload photo. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title || !description || !dateOfMemory) {
       toast({
         title: "Missing Information",
@@ -87,11 +118,10 @@ export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalPro
     createMemoryMutation.mutate(memoryData);
   };
 
-  const addPhotoUrl = () => {
-    const url = prompt("Enter photo URL:");
-    if (url) {
-      const caption = prompt("Enter photo caption (optional):") || "";
-      setPhotos([...photos, { url, caption }]);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadPhotoMutation.mutate(file);
     }
   };
 
@@ -193,30 +223,30 @@ export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalPro
           {/* Ratings */}
           <div className="space-y-4">
             <h3 className="font-romantic text-lg text-chocolate handwriting-style">Rate Your Experience</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label className="font-sans text-chocolate text-sm">Food</Label>
-                <StarRating 
-                  rating={foodRating} 
+                <StarRating
+                  rating={foodRating}
                   onRatingChange={setFoodRating}
                   size="md"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="font-sans text-chocolate text-sm">Place</Label>
-                <StarRating 
-                  rating={placeRating} 
+                <StarRating
+                  rating={placeRating}
                   onRatingChange={setPlaceRating}
                   size="md"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="font-sans text-chocolate text-sm">Overall</Label>
-                <StarRating 
-                  rating={overallRating} 
+                <StarRating
+                  rating={overallRating}
                   onRatingChange={setOverallRating}
                   size="md"
                 />
@@ -228,18 +258,26 @@ export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalPro
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <Label className="font-sans text-chocolate font-semibold">Photos</Label>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
+                accept="image/*"
+              />
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={addPhotoUrl}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadPhotoMutation.isPending}
                 className="border-rose-primary/30 text-chocolate hover:bg-rose-primary/10"
               >
                 <Upload className="w-4 h-4 mr-2" />
-                Add Photo URL
+                {uploadPhotoMutation.isPending ? "Uploading..." : "Upload Photo"}
               </Button>
             </div>
-            
+
             {photos.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {photos.map((photo, index) => (
