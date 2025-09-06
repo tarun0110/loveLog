@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import {
@@ -8,6 +9,15 @@ import {
   insertCommentSchema,
 } from "@shared/schema";
 import { z } from "zod";
+import { uploadToS3 } from "./s3";
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5 MB limit
+  },
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -437,24 +447,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
   );
 
-  // Photo upload route (placeholder - would integrate with file upload service)
-  app.post("/api/upload", isAuthenticated, async (req: any, res) => {
-    try {
-      // In a real implementation, this would handle file uploads
-      // For now, return mock URLs
-      const { files } = req.body;
+  // Photo upload route
+  app.post(
+    "/api/upload",
+    isAuthenticated,
+    upload.array("photos", 5),
+    async (req: any, res) => {
+      try {
+        const files = req.files as Express.Multer.File[];
+        if (!files || files.length === 0) {
+          return res.status(400).json({ message: "No files uploaded." });
+        }
 
-      const uploadedFiles = files.map((file: any, index: number) => ({
-        url: `https://api.placeholder.com/600x400/F8BBD9/3E2723?text=Photo${index + 1}`,
-        caption: file.caption || "",
-      }));
+        const urls = await uploadToS3(files);
 
-      res.json({ files: uploadedFiles });
-    } catch (error) {
-      console.error("Error uploading files:", error);
-      res.status(500).json({ message: "Failed to upload files" });
+        res.json({ urls });
+      } catch (error) {
+        console.error("Error uploading files:", error);
+        res.status(500).json({ message: "Failed to upload files" });
+      }
     }
-  });
+  );
 
   const httpServer = createServer(app);
   return httpServer;
