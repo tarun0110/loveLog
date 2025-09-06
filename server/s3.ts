@@ -25,24 +25,28 @@ const s3Client = new S3Client({
 
 const BUCKET_NAME = process.env.S3_BUCKET_NAME;
 
-export async function uploadToS3(file: Express.Multer.File): Promise<string> {
-  const uuid = short.generate();
-  const key = `uploads/${uuid}-${file.originalname}`;
+export async function uploadToS3(files: Express.Multer.File[]): Promise<string[]> {
+  const uploadPromises = files.map(async (file) => {
+    const uuid = short.generate();
+    const key = `uploads/${uuid}-${file.originalname}`;
 
-  const command = new PutObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: key,
-    Body: file.buffer,
-    ContentType: file.mimetype,
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    });
+
+    await s3Client.send(command);
+    const url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    return url;
   });
 
   try {
-    await s3Client.send(command);
-    // Construct the public URL
-    const url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-    return url;
+    const urls = await Promise.all(uploadPromises);
+    return urls;
   } catch (error) {
     console.error("Error uploading to S3:", error);
-    throw new Error("Failed to upload file to S3");
+    throw new Error("Failed to upload one or more files to S3");
   }
 }

@@ -451,19 +451,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post(
     "/api/upload",
     isAuthenticated,
-    upload.single("photo"),
+    upload.array("photos", 5),
     async (req: any, res) => {
       try {
-        if (!req.file) {
-          return res.status(400).json({ message: "No file uploaded." });
+        const files = req.files as Express.Multer.File[];
+        if (!files || files.length === 0) {
+          return res.status(400).json({ message: "No files uploaded." });
         }
 
-        const url = await uploadToS3(req.file);
+        const urls = await uploadToS3(files);
 
-        res.json({ url });
+        res.json({ urls });
       } catch (error) {
-        console.error("Error uploading file:", error);
-        res.status(500).json({ message: "Failed to upload file" });
+        console.error("Error uploading files:", error);
+        res.status(500).json({ message: "Failed to upload files" });
       }
     }
   );

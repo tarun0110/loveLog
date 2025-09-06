@@ -62,30 +62,38 @@ export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalPro
   });
 
   const uploadPhotoMutation = useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async (files: File[]) => {
       const formData = new FormData();
-      formData.append("photo", file);
+      files.forEach(file => {
+        formData.append("photos", file);
+      });
+
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
+
       if (!response.ok) {
-        throw new Error("Failed to upload photo");
+        throw new Error("Failed to upload photos");
       }
       return response.json();
     },
     onSuccess: (data) => {
-      const caption = prompt("Enter photo caption (optional):") || "";
-      setPhotos([...photos, { url: data.url, caption }]);
+      const newPhotos = data.urls.map((url: string) => {
+        const caption = "";
+        return { url, caption };
+      });
+
+      setPhotos([...photos, ...newPhotos]);
       toast({
-        title: "Photo Uploaded",
-        description: "Your photo has been successfully uploaded.",
+        title: "Photos Uploaded",
+        description: `${data.urls.length} photo(s) have been successfully uploaded.`,
       });
     },
     onError: (error) => {
       toast({
         title: "Upload Error",
-        description: "Failed to upload photo. Please try again.",
+        description: "Failed to upload photos. Please try again.",
         variant: "destructive",
       });
     },
@@ -119,9 +127,10 @@ export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalPro
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      uploadPhotoMutation.mutate(file);
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const filesArray = Array.from(files);
+      uploadPhotoMutation.mutate(filesArray);
     }
   };
 
@@ -264,6 +273,7 @@ export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalPro
                 onChange={handleFileChange}
                 className="hidden"
                 accept="image/*"
+                multiple
               />
               <Button
                 type="button"
@@ -274,7 +284,7 @@ export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalPro
                 className="border-rose-primary/30 text-chocolate hover:bg-rose-primary/10"
               >
                 <Upload className="w-4 h-4 mr-2" />
-                {uploadPhotoMutation.isPending ? "Uploading..." : "Upload Photo"}
+                {uploadPhotoMutation.isPending ? "Uploading..." : "Upload Photos"}
               </Button>
             </div>
 
