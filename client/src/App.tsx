@@ -20,6 +20,7 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/timeline" component={Timeline} />
           <Route path="/timeline/:partnershipId" component={Timeline} />
           <Route path="/profile" component={Profile} />
         </>
