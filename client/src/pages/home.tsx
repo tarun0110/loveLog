@@ -17,7 +17,7 @@ export default function Home() {
   const queryClient = useQueryClient();
   const [showInviteModal, setShowInviteModal] = useState(false);
 
-  const { data: partnership, isLoading: partnershipLoading } = useQuery<any>({
+  const { data: partnerships, isLoading: partnershipLoading } = useQuery<any[]>({
     queryKey: ["/api/partnerships/active"],
     retry: false,
   });
@@ -129,12 +129,6 @@ export default function Home() {
             </div>
             
             <div className="flex items-center space-x-2 sm:space-x-4">
-            <Link href="/timeline">
-                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary p-2">
-                  <UserIcon className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Timeline</span>
-                </Button>
-              </Link>
               <Link href="/profile">
                 <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary p-2">
                   <UserIcon className="w-4 h-4 sm:mr-2" />
@@ -215,7 +209,7 @@ export default function Home() {
                       <div className="flex flex-row sm:flex-col gap-2 sm:space-y-2 sm:gap-0 flex-wrap sm:flex-nowrap">
                         {p.status === 'active' && (
                           <>
-                            <Link href="/timeline">
+                            <Link href={`/timeline/${p.id}`}>
                               <Button size="sm" className="bg-rose-primary hover:bg-rose-primary/80 text-chocolate font-sans text-xs sm:text-sm whitespace-nowrap">
                                 <History className="mr-1 w-3 h-3 sm:w-4 sm:h-4" />
                                 <span className="hidden xs:inline">View </span>Timeline
@@ -283,7 +277,7 @@ export default function Home() {
                 </div>
               )}
               
-              {allPartnerships?.length > 0 && !allPartnerships.some(p => p.status === 'active') && (
+              {allPartnerships?.length > 0 && !(partnerships && partnerships.length > 0) && (
                 <div className="text-center pt-4 border-t border-rose-primary/20">
                   <Button
                     onClick={() => setShowInviteModal(true)}

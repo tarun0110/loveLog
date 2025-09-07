@@ -56,7 +56,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         partner.id,
       );
-      console.error(existingPartnership);
       if (existingPartnership && existingPartnership.status == "active") {
         return res.status(400).json({ message: "Partnership already exists" });
       }
@@ -85,11 +84,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: any, res) => {
       try {
         const userId = req.user.claims.sub;
-        const partnership = await storage.getActivePartnership(userId);
-        res.json(partnership);
+        const partnerships = await storage.getActivePartnerships(userId);
+        res.json(partnerships);
       } catch (error) {
-        console.error("Error fetching active partnership:", error);
-        res.status(500).json({ message: "Failed to fetch partnership" });
+        console.error("Error fetching active partnerships:", error);
+        res.status(500).json({ message: "Failed to fetch partnerships" });
       }
     },
   );
@@ -237,7 +236,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/memories", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const {
+      let {
+        partnershipId,
         limit = 10,
         offset = 0,
         search,
@@ -247,16 +247,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         dateTo,
       } = req.query;
 
-      const partnership = await storage.getActivePartnership(userId);
-      if (!partnership) {
-        return res.status(404).json({ message: "No active partnership found" });
+      if (!partnershipId) {
+        const partnerships = await storage.getActivePartnerships(userId);
+        if (partnerships.length > 0) {
+          partnershipId = partnerships[0].id; // Default to the first active partnership
+        } else {
+          return res.status(404).json({ message: "No active partnerships found" });
+        }
+      }
+      
+      // Verify user is part of the partnership
+      const partnerships = await storage.getAllPartnerships(userId);
+      const isUserInPartnership = partnerships.some(p => p.id === partnershipId);
+
+      if (!isUserInPartnership) {
+        return res.status(403).json({ message: "Unauthorized to view memories for this partnership" });
       }
 
       let memories;
 
       if (search) {
         memories = await storage.searchMemories(
-          partnership.id,
+          partnershipId as string,
           search as string,
         );
       } else if (location || rating || dateFrom || dateTo) {
@@ -266,10 +278,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (dateFrom) filters.dateFrom = new Date(dateFrom as string);
         if (dateTo) filters.dateTo = new Date(dateTo as string);
 
-        memories = await storage.filterMemories(partnership.id, filters);
+        memories = await storage.filterMemories(partnershipId as string, filters);
       } else {
         memories = await storage.getMemoriesForPartnership(
-          partnership.id,
+          partnershipId as string,
           parseInt(limit as string),
           parseInt(offset as string),
         );
@@ -285,16 +297,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/memories", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const { partnershipId } = req.body; 
 
-      const partnership = await storage.getActivePartnership(userId);
-      if (!partnership) {
-        return res.status(404).json({ message: "No active partnership found" });
+      if (!partnershipId) {
+        return res.status(400).json({ message: "Partnership ID is required" });
       }
+
+      // Verify user is part of the partnership
+      const partnerships = await storage.getAllPartnerships(userId);
+      const isUserInPartnership = partnerships.some(p => p.id === partnershipId && p.status === 'active');
+
+      if (!isUserInPartnership) {
+        return res.status(403).json({ message: "Unauthorized to create memories for this partnership" });
+      }
+      
       req.body.dateOfMemory = new Date(req.body.dateOfMemory);
 
       const memoryData = insertMemorySchema.parse({
         ...req.body,
-        partnershipId: partnership.id,
         createdById: userId,
         status: "pending",
       });
@@ -323,8 +343,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify user has access to this memory
-      const partnership = await storage.getActivePartnership(userId);
-      if (!partnership || memory.partnershipId !== partnership.id) {
+      const partnerships = await storage.getAllPartnerships(userId);
+      const isUserInPartnership = partnerships.some(p => p.id === memory.partnershipId);
+
+      if (!isUserInPartnership) {
         return res.status(403).json({ message: "Unauthorized" });
       }
 
@@ -355,8 +377,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .json({ message: "Cannot approve your own memory" });
         }
 
-        const partnership = await storage.getActivePartnership(userId);
-        if (!partnership || memory.partnershipId !== partnership.id) {
+        const partnerships = await storage.getAllPartnerships(userId);
+        const isUserInPartnership = partnerships.some(p => p.id === memory.partnershipId);
+  
+        if (!isUserInPartnership) {
           return res.status(403).json({ message: "Unauthorized" });
         }
 
@@ -393,8 +417,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .json({ message: "Cannot reject your own memory" });
         }
 
-        const partnership = await storage.getActivePartnership(userId);
-        if (!partnership || memory.partnershipId !== partnership.id) {
+        const partnerships = await storage.getAllPartnerships(userId);
+        const isUserInPartnership = partnerships.some(p => p.id === memory.partnershipId);
+  
+        if (!isUserInPartnership) {
           return res.status(403).json({ message: "Unauthorized" });
         }
 
@@ -422,8 +448,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Verify user has access to this memory
-        const partnership = await storage.getActivePartnership(userId);
-        if (!partnership || memory.partnershipId !== partnership.id) {
+        const partnerships = await storage.getAllPartnerships(userId);
+        const isUserInPartnership = partnerships.some(p => p.id === memory.partnershipId);
+  
+        if (!isUserInPartnership) {
           return res.status(403).json({ message: "Unauthorized" });
         }
 
