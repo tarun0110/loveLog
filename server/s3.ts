@@ -1,6 +1,6 @@
-
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import short from "short-uuid";
+import sharp from "sharp";
 
 if (!process.env.S3_BUCKET_NAME) {
   throw new Error("Environment variable S3_BUCKET_NAME not provided");
@@ -28,13 +28,19 @@ const BUCKET_NAME = process.env.S3_BUCKET_NAME;
 export async function uploadToS3(files: Express.Multer.File[]): Promise<string[]> {
   const uploadPromises = files.map(async (file) => {
     const uuid = short.generate();
-    const key = `uploads/${uuid}-${file.originalname}`;
+    const originalNameWithoutExt = file.originalname.split('.').slice(0, -1).join('.');
+    const key = `uploads/${uuid}-${originalNameWithoutExt}.webp`;
+
+    // Compress image with sharp
+    const compressedImageBuffer = await sharp(file.buffer)
+      .webp({ quality: 80 }) // Convert to webp with 80% quality
+      .toBuffer();
 
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,
-      Body: file.buffer,
-      ContentType: file.mimetype,
+      Body: compressedImageBuffer,
+      ContentType: "image/webp",
     });
 
     await s3Client.send(command);
