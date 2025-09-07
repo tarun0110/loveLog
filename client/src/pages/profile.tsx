@@ -154,12 +154,6 @@ export default function Profile() {
                   <span className="hidden sm:inline">Home</span>
                 </Button>
               </Link>
-              <Link href="/timeline">
-                <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary p-2">
-                  <User className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Timeline</span>
-                </Button>
-              </Link>
       
               <div className="flex items-center space-x-2">
                 {(user as any)?.profileImageUrl && (

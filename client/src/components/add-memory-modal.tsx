@@ -12,11 +12,12 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import StarRating from "./ui/star-rating";
 
 interface AddMemoryModalProps {
+  partnershipId: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalProps) {
+export default function AddMemoryModal({ partnershipId, onClose, onSuccess }: AddMemoryModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [detailedDescription, setDetailedDescription] = useState("");
@@ -112,6 +113,7 @@ export default function AddMemoryModal({ onClose, onSuccess }: AddMemoryModalPro
     }
 
     const memoryData = {
+      partnershipId,
       title,
       description,
       detailedDescription: detailedDescription || description,

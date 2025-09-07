@@ -4,9 +4,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
-import { Heart, Search, MapPin, Calendar, Star, Plus, LogOut, Home, User } from "lucide-react";
+import { Heart, Search, Plus, LogOut, Home, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link, useParams } from "wouter";
 import MemoryCard from "@/components/memory-card";
 import MemoryDetailModal from "@/components/memory-detail-modal";
 import AddMemoryModal from "@/components/add-memory-modal";
@@ -17,7 +17,9 @@ export default function Timeline() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+  const params = useParams();
+  const partnershipId = params.partnershipId ? params.partnershipId : "";
+  console.log('partnershio id client ', partnershipId);
   const [selectedMemory, setSelectedMemory] = useState<MemoryWithDetails | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -31,6 +33,7 @@ export default function Timeline() {
 
   // Build query params
   const queryParams = new URLSearchParams();
+  if (partnershipId!="") queryParams.set('partnershipId', partnershipId);
   if (searchQuery) queryParams.set('search', searchQuery);
   if (filters.location) queryParams.set('location', filters.location);
   if (filters.rating) queryParams.set('rating', filters.rating.toString());
@@ -38,19 +41,22 @@ export default function Timeline() {
   if (filters.dateTo) queryParams.set('dateTo', filters.dateTo);
 
   const { data: memories = [], isLoading: memoriesLoading, error } = useQuery<MemoryWithDetails[]>({
-    queryKey: ["/api/memories", queryParams.toString()],
+    queryKey: ["/api/memories", partnershipId, queryParams.toString()],
     queryFn: async () => {
-      const url = queryParams.toString() 
-        ? `/api/memories?${queryParams.toString()}`
-        : '/api/memories';
+      const url = `/api/memories?${queryParams.toString()}`;
       const response = await fetch(url, {
         credentials: 'include'
       });
       if (!response.ok) {
+        if (response.status === 404) {
+          // Handle case where no memories are found for the partnership
+          return [];
+        }
         throw new Error(`${response.status}: ${response.statusText}`);
       }
       return response.json();
     },
+    enabled: !!partnershipId,
     retry: false,
   });
 
@@ -59,7 +65,7 @@ export default function Timeline() {
       await apiRequest("PATCH", `/api/memories/${memoryId}/approve`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/memories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/memories", partnershipId] });
       toast({
         title: "Memory Approved",
         description: "The memory has been added to your timeline!",
@@ -69,11 +75,11 @@ export default function Timeline() {
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          description: "You are logged out. Please log in again.",
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/";
         }, 500);
         return;
       }
@@ -90,7 +96,7 @@ export default function Timeline() {
       await apiRequest("PATCH", `/api/memories/${memoryId}/reject`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/memories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/memories", partnershipId] });
       toast({
         title: "Memory Rejected",
         description: "The memory has been removed from the timeline.",
@@ -100,11 +106,11 @@ export default function Timeline() {
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          description: "You are logged out. Please log in again.",
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/";
         }, 500);
         return;
       }
@@ -120,26 +126,34 @@ export default function Timeline() {
     if (!authLoading && !user) {
       toast({
         title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+        description: "You must be logged in to view a timeline.",
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/";
       }, 500);
-      return;
     }
   }, [user, authLoading, toast]);
 
   useEffect(() => {
-    if (error && isUnauthorizedError(error)) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
+    if (error) {
+      console.log('Error: ', error);
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You do not have permission to view this timeline.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch memories. Please try again.",
+          variant: "destructive",
+        });
+      }
       setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
+        window.location.href = "/";
+      }, 50000);
     }
   }, [error, toast]);
 
@@ -153,7 +167,7 @@ export default function Timeline() {
       </div>
     );
   }
-
+  
   const approvedMemories = memories.filter((memory: MemoryWithDetails) => memory.status === 'approved');
   const pendingMemories = memories.filter((memory: MemoryWithDetails) => memory.status === 'pending');
 
@@ -162,7 +176,6 @@ export default function Timeline() {
 
   return (
     <div className="min-h-screen bg-cream-bg scrapbook-texture">
-      {/* Navigation */}
       <nav className="bg-off-white/95 backdrop-blur-sm shadow-sm border-b border-rose-primary/20 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -170,7 +183,6 @@ export default function Timeline() {
               <Heart className="text-rose-primary text-xl sm:text-2xl" />
               <h1 className="font-romantic text-lg sm:text-2xl text-chocolate font-bold">LoveTimeline</h1>
             </div>
-            
             <div className="flex items-center space-x-1 sm:space-x-4">
               <Link href="/">
                 <Button variant="ghost" size="sm" className="text-chocolate hover:text-rose-primary p-2">
@@ -192,7 +204,6 @@ export default function Timeline() {
               >
                 <Search className="w-4 h-4" />
               </Button>
-              
               <div className="flex items-center space-x-2">
                 {(user as any)?.profileImageUrl && (
                   <img 
@@ -201,7 +212,6 @@ export default function Timeline() {
                     className="w-8 h-8 rounded-full object-cover border-2 border-rose-primary"
                   />
                 )}
-                {/* Partner would be shown here if available */}
               </div>
               <Button 
                 onClick={() => window.location.href = '/api/logout'}
@@ -217,7 +227,6 @@ export default function Timeline() {
       </nav>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Timeline Header */}
         <div className="text-center mb-8 sm:mb-12">
           <h2 className="font-romantic text-2xl sm:text-4xl md:text-5xl text-chocolate mb-4 handwriting-style">
             Our Love Story
@@ -225,8 +234,6 @@ export default function Timeline() {
           <p className="font-sans text-brown-warm/80 text-base sm:text-lg mb-6 px-4">
             Cherishing every moment of our beautiful journey together
           </p>
-          
-          {/* Timeline Stats */}
           <div className="grid grid-cols-3 gap-4 sm:flex sm:justify-center sm:space-x-8 mb-8">
             <div className="text-center">
               <div className="text-xl sm:text-2xl font-bold text-chocolate">{totalDates}</div>
@@ -243,7 +250,6 @@ export default function Timeline() {
           </div>
         </div>
 
-        {/* Search and Filters */}
         {showSearch && (
           <SearchFilters 
             searchQuery={searchQuery}
@@ -253,9 +259,7 @@ export default function Timeline() {
           />
         )}
 
-        {/* Timeline Container */}
         <div className="space-y-12">
-          {/* Pending memories for approval */}
           {pendingMemories.map((memory: MemoryWithDetails) => (
             <MemoryCard
               key={memory.id}
@@ -268,7 +272,6 @@ export default function Timeline() {
             />
           ))}
 
-          {/* Approved memories */}
           {approvedMemories.map((memory: MemoryWithDetails) => (
             <MemoryCard
               key={memory.id}
@@ -296,7 +299,6 @@ export default function Timeline() {
           )}
         </div>
 
-        {/* Load More Button */}
         {memories.length > 0 && (
           <div className="text-center mt-12">
             <Button 
@@ -310,7 +312,6 @@ export default function Timeline() {
         )}
       </main>
 
-      {/* Floating Action Button */}
       <Button
         onClick={() => setShowAddModal(true)}
         className="fixed bottom-8 right-8 bg-rose-primary hover:bg-rose-primary/80 text-chocolate w-16 h-16 rounded-full shadow-xl hover:scale-105 transition-all flex items-center justify-center"
@@ -318,7 +319,6 @@ export default function Timeline() {
         <Plus className="text-xl" />
       </Button>
 
-      {/* Modals */}
       {selectedMemory && (
         <MemoryDetailModal
           memory={selectedMemory}
@@ -327,12 +327,13 @@ export default function Timeline() {
         />
       )}
 
-      {showAddModal && (
+      {showAddModal && partnershipId && (
         <AddMemoryModal
+          partnershipId={partnershipId}
           onClose={() => setShowAddModal(false)}
           onSuccess={() => {
             setShowAddModal(false);
-            queryClient.invalidateQueries({ queryKey: ["/api/memories"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/memories", partnershipId] });
           }}
         />
       )}
