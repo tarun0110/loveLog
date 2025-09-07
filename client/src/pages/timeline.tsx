@@ -171,8 +171,8 @@ export default function Timeline() {
   const approvedMemories = memories.filter((memory: MemoryWithDetails) => memory.status === 'approved');
   const pendingMemories = memories.filter((memory: MemoryWithDetails) => memory.status === 'pending');
 
-  const totalDates = approvedMemories.length;
-  const totalPhotos = approvedMemories.reduce((sum: number, memory: MemoryWithDetails) => sum + memory.photos.length, 0);
+  const totalDates = memories.length;
+  const totalPhotos = memories.reduce((sum: number, memory: MemoryWithDetails) => sum + memory.photos.length, 0);
 
   return (
     <div className="min-h-screen bg-cream-bg scrapbook-texture">
