@@ -113,7 +113,7 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", passport.authenticate('google', {
-      successReturnToOrRedirect: "/timeline",
+      successReturnToOrRedirect: "/",
       failureRedirect: "/",
   }));
 
