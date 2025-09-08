@@ -144,14 +144,6 @@ export default function AddMemoryModal({ partnershipId, onClose, onSuccess }: Ad
             <DialogTitle className="font-romantic text-3xl text-chocolate handwriting-style">
               Add New Memory
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="text-brown-warm/60 hover:text-rose-primary"
-            >
-              <X className="text-xl" />
-            </Button>
           </div>
         </DialogHeader>
 
