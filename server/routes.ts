@@ -497,6 +497,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  app.get(
+    "/api/health",
+    async (req: any, res) => {
+      try {
+        const url = "https://lovelog.onrender.com/";
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Endpoint Not Healthy");
+        }
+        console.log('Endpoint healthy');
+        res.status(200).json({ message: "Endpoint Healthy" });
+      }catch (error){
+        console.error("Error Heath Down", error);
+        res.status(500).json({ message: "Endpoint Not Healthy" });
+      }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
